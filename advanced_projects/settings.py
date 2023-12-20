@@ -120,8 +120,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# manually added this to allow other dirs
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    BASE_DIR / 'static' # allows for global static dir inclusion
 ]
 
 # Default primary key field type
