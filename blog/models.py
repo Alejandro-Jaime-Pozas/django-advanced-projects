@@ -32,7 +32,7 @@ class Post(models.Model):
     content = models.TextField(validators=[MinLengthValidator(10)])
     author = models.ForeignKey(
         Author, on_delete=models.SET_NULL, null=True, related_name='posts')
-    tags = models.ManyToManyField(Tag, null=True, related_name='posts')
+    tags = models.ManyToManyField(Tag, related_name='posts')
 
     def __str__(self) -> str:
         return f"{self.title} | by: {self.author}"
