@@ -27,5 +27,5 @@ def post_detail(request, slug):
     identified_post = get_object_or_404(Post, slug=slug) # get_404 gets an object, then with condition specified
     return render(request, 'blog/post-detail.html', {
         'post': identified_post,
-        'post_tags': identified_post.tags.all() # now this is a query list
+        'post_tags': identified_post.tags.all() # now this is a query list, need this in order to get relationships for models
     })
