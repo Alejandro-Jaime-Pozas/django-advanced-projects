@@ -33,4 +33,20 @@
 <main>
     {{ post.content|linebreaks }}
 </main>
+
+<div class="">
+    <form action="">
+        {% for form_field in comment_form %}
+            <div class="form-control">
+                {% comment %} label_tag accesses the labels field from the form {% endcomment %}
+                {{ form_field.label_tag}}
+                {{ form_field }}
+                {% comment %} errors acceses any errors from the form_field object  {% endcomment %}
+                {{ form_field.errors }}
+            </div>
+        {% endfor %}
+        <button>Save Comment</button>
+    </form>
+</div>
+
 {% endblock %}

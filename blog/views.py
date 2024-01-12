@@ -1,9 +1,25 @@
+from typing import Any
+from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView
 
 from .models import Post
+from .forms import CommentForm
 
 
 # Create your views here.
+
+# include a start page w only the 3 latest posts
+class StartingPageView(ListView):
+    template_name = 'blog/index.html'
+    model = Post 
+    ordering = ['-date', ] # use ordering field to order the list of data '-' means desc order
+    context_object_name = 'posts' # change name to readable for use in template
+
+    def get_queryset(self): # to overwrite the default queryset
+        queryset = super().get_queryset()
+        data = queryset[:3]
+        return data
 
 # include a start page w only the 3 latest posts
 def starting_page(request):
@@ -12,6 +28,13 @@ def starting_page(request):
         'posts': latest_posts
     })
 
+    
+# include an all posts page that shows all posts
+class AllPostsView(ListView):
+    template_name = 'blog/all-posts.html'
+    model = Post 
+    ordering = ['-date']
+    context_object_name = 'all_posts'
 
 # include an all posts page that shows all posts
 def posts(request):
@@ -20,6 +43,17 @@ def posts(request):
         'all_posts': all_posts
     })
 
+    
+# include the post detail including its content
+class SinglePostView(DetailView): # this Detail view auto raises error if object not found and takes a slug as a field
+    template_name = 'blog/post-detail.html'
+    model = Post 
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['post_tags'] = self.object.tags.all() # to get access to a single post's fields
+        context['comment_form'] = CommentForm() # to create instance of a form based on comment model that you can then access within the template
+        return context
 
 # include the post detail including its content
 def post_detail(request, slug):
