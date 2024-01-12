@@ -26,7 +26,8 @@ class Tag(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=150)
     excerpt = models.CharField(max_length=200)
-    image_name = models.CharField(max_length=100)
+    # image_name = models.CharField(max_length=100) # replaced with image field
+    image = models.ImageField(upload_to='posts', null=True) # insert a folder to upload images to
     date = models.DateField(auto_now=True) # updates the date each time the object is saved, not a create date
     slug = models.SlugField(unique=True, ) # slug fields auto add db_index=True
     content = models.TextField(validators=[MinLengthValidator(10)])
