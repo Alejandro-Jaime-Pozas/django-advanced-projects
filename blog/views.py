@@ -47,6 +47,14 @@ def posts(request):
     
 # include the post detail including its content
 class SinglePostView(View): # this Detail view auto raises error if object not found and takes a slug as a field
+    def is_stored_post(self, request, post_id):
+        stored_posts = request.session.get('stored_posts')
+        if stored_posts:
+            is_saved_for_later = post_id in stored_posts
+        else:
+            is_saved_for_later = False 
+        return is_saved_for_later
+
     def get(self, request, slug): # slug is parameter passed through in the url request linked to this view
         post = Post.objects.get(slug=slug)
         # include context data for use in template
@@ -54,7 +62,8 @@ class SinglePostView(View): # this Detail view auto raises error if object not f
             'post': post,
             'post_tags': post.tags.all(),
             'comment_form': CommentForm(),
-            'comments': post.comments.all().order_by("-id")
+            'comments': post.comments.all().order_by("-id"),
+            'saved_for_later': self.is_stored_post(request, post.id),
         }
         return render(request, 'blog/post-detail.html', context)
 
@@ -70,7 +79,8 @@ class SinglePostView(View): # this Detail view auto raises error if object not f
             'post': post,
             'post_tags': post.tags.all(),
             'comment_form': comment_form,
-            'comments': post.comments.all().order_by("-id")
+            'comments': post.comments.all().order_by("-id"),
+            'saved_for_later': self.is_stored_post(request, post.id),
         }
         return render(request, 'blog/post-detail.html', context)
 
@@ -100,3 +110,40 @@ def post_detail(request, slug):
         'post': identified_post,
         'post_tags': identified_post.tags.all() # now this is a query list, need this in order to get relationships for models
     })
+
+
+class ReadLaterView(View):
+    def get(self, request):
+        # get the stored posts / read later
+        stored_posts = request.session.get("stored_posts") 
+
+        context = {}
+
+        if stored_posts == None or len(stored_posts) == 0:
+            context['posts'] = []
+            context['has_posts'] = False 
+        else:
+            posts = Post.objects.filter(id__in=stored_posts)
+            context['posts'] = posts 
+            context['has_posts'] = True 
+
+        return render(request, 'blog/stored-posts.html', context)
+
+
+    def post(self, request):
+        stored_posts = request.session.get("stored_posts") 
+
+        # if stored_posts is None, create empty list
+        if stored_posts is None:
+            stored_posts = []
+
+        post_id = int(request.POST["post_id"])
+
+        if post_id not in stored_posts:
+            stored_posts.append(post_id) # from input form in template
+        else:
+            stored_posts.remove(post_id)
+            
+        request.session['stored_posts'] = stored_posts # need to add to session the stored posts
+
+        return HttpResponseRedirect('/')

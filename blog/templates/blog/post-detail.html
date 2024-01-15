@@ -29,7 +29,19 @@
             {% endfor %}
         </div>
         <div id="read-later">
-            <button>Read Later</button>
+            {% comment %} reference the read-later url name from urls.py to redirect {% endcomment %}
+            <form action=" {% url "read-later" %}" method="POST">
+                {% csrf_token %}
+                {% comment %} input name of post_id below ALLOWS access to its contents in views.py POST request {% endcomment %}
+                <input type="hidden" value="{{ post.id }}" name="post_id">
+                <button>
+                    {% if saved_for_later %}
+                        Remove from Read Later
+                    {% else %}
+                        Read Later
+                    {% endif %}
+                </button>
+            </form>
         </div>
         <article>
             <img src="{{ post.image.url }}" alt="{{ post.title }}">
