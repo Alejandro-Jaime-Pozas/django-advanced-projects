@@ -10,46 +10,72 @@
 {% endblock css_files %}
 
 {% block content %}
-<section id="summary">
-    <h2>{{ post.title }}</h2>
-    <div class="">
-        {% comment %} post.tags below is not a LIST, it's a special object {% endcomment %}
-        {% for tag in post_tags %}
-            <span class='tag'>#{{ tag.caption }}</span>
-        {% endfor %}
-    </div>
-    <article>
-        <img src="{{ post.image.url }}" alt="{{ post.title }}">
-        <address>By 
-            {% comment %} inlcude mailto in anchor href to open user's default email client {% endcomment %}
-            <a href="mailto:{{ post.author.email }}">{{ post.author }}</a>
-        </address>
-        <div>
-            Last updated on <time>{{ post.date|date:"d M Y" }}</time>
+
+    {% if comment_form.errors %}
+        <div class="" id="alert">
+            <h2>Saving the comment field failed!</h2>
+            <p>Please check the comment form below the post and fix your errors.</p>
+            {% comment %} you can add # to another element by including its id and linking to that {% endcomment %}
+            <a href="#comment-form">Fix!</a>
         </div>
-    </article>
-</section>
+    {% endif %}
 
-<main>
-    {{ post.content|linebreaks }}
-</main>
-
-<section id='comment-form'>
-    <h2>Your Comment</h2>
-    <form action="{% url "post-detail-page" post.slug %}" method="POST">
-        {% comment %} csrf token to only permit  {% endcomment %}
-        {% csrf_token %}
-        {% for form_field in comment_form %}
-            <div class="form-control">
-                {% comment %} label_tag accesses the labels field from the form {% endcomment %}
-                {{ form_field.label_tag}}
-                {{ form_field }}
-                {% comment %} errors acceses any errors from the form_field object  {% endcomment %}
-                {{ form_field.errors }}
+    <section id="summary">
+        <h2>{{ post.title }}</h2>
+        <div class="">
+            {% comment %} post.tags below is not a LIST, it's a special object {% endcomment %}
+            {% for tag in post_tags %}
+                <span class='tag'>#{{ tag.caption }}</span>
+            {% endfor %}
+        </div>
+        <div id="read-later">
+            <button>Read Later</button>
+        </div>
+        <article>
+            <img src="{{ post.image.url }}" alt="{{ post.title }}">
+            <address>By 
+                {% comment %} inlcude mailto in anchor href to open user's default email client {% endcomment %}
+                <a href="mailto:{{ post.author.email }}">{{ post.author }}</a>
+            </address>
+            <div>
+                Last updated on <time>{{ post.date|date:"d M Y" }}</time>
             </div>
-        {% endfor %}
-        <button>Save Comment</button>
-    </form>
-</section>
+        </article>
+    </section>
+
+
+    <main>
+        {{ post.content|linebreaks }}
+    </main>
+
+    <section id="comments">
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <h2>{{ comment.user_name }}</h2>
+                    <p>{{ comment.text|linebreaks }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section id='comment-form'>
+        <h2>Your Comment</h2>
+        <form action="{% url "post-detail-page" post.slug %}" method="POST">
+            {% comment %} csrf token to only permit  {% endcomment %}
+            {% csrf_token %}
+            {% for form_field in comment_form %}
+                {% comment %} if there's submit errors, add css class to show them {% endcomment %}
+                <div class="form-control {% if form_field.errors %}invalid{% endif %}">
+                    {% comment %} label_tag accesses the labels field from the form {% endcomment %}
+                    {{ form_field.label_tag}}
+                    {{ form_field }}
+                    {% comment %} errors acceses any errors from the form_field object  {% endcomment %}
+                    {{ form_field.errors }}
+                </div>
+            {% endfor %}
+            <button>Save Comment</button>
+        </form>
+    </section>
 
 {% endblock %}

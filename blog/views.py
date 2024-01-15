@@ -49,10 +49,12 @@ def posts(request):
 class SinglePostView(View): # this Detail view auto raises error if object not found and takes a slug as a field
     def get(self, request, slug): # slug is parameter passed through in the url request linked to this view
         post = Post.objects.get(slug=slug)
+        # include context data for use in template
         context = {
             'post': post,
             'post_tags': post.tags.all(),
-            'comment_form': CommentForm()
+            'comment_form': CommentForm(),
+            'comments': post.comments.all().order_by("-id")
         }
         return render(request, 'blog/post-detail.html', context)
 
@@ -67,7 +69,8 @@ class SinglePostView(View): # this Detail view auto raises error if object not f
         context = {
             'post': post,
             'post_tags': post.tags.all(),
-            'comment_form': CommentForm()
+            'comment_form': comment_form,
+            'comments': post.comments.all().order_by("-id")
         }
         return render(request, 'blog/post-detail.html', context)
 
