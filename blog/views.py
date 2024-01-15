@@ -1,7 +1,8 @@
-from typing import Any
-from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
+from django.views import View
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from .models import Post
 from .forms import CommentForm
@@ -45,15 +46,48 @@ def posts(request):
 
     
 # include the post detail including its content
-class SinglePostView(DetailView): # this Detail view auto raises error if object not found and takes a slug as a field
-    template_name = 'blog/post-detail.html'
-    model = Post 
+class SinglePostView(View): # this Detail view auto raises error if object not found and takes a slug as a field
+    def get(self, request, slug): # slug is parameter passed through in the url request linked to this view
+        post = Post.objects.get(slug=slug)
+        context = {
+            'post': post,
+            'post_tags': post.tags.all(),
+            'comment_form': CommentForm()
+        }
+        return render(request, 'blog/post-detail.html', context)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['post_tags'] = self.object.tags.all() # to get access to a single post's fields
-        context['comment_form'] = CommentForm() # to create instance of a form based on comment model that you can then access within the template
-        return context
+    def post(self, request, slug):
+        comment_form = CommentForm(request.POST) # request.POST contains the user's submitted data
+        post = Post.objects.get(slug=slug)
+        if comment_form.is_valid(): # check if requirements for form based on Comment model are met
+            comment = comment_form.save(commit=False) # this bc it's a ModelForm, not just Form; don't commit since post field that is FK is being excluded in model, have to add back
+            comment.post = post
+            comment.save()
+            return HttpResponseRedirect(reverse('post-detail-page', args=[slug])) # this will create a get request
+        context = {
+            'post': post,
+            'post_tags': post.tags.all(),
+            'comment_form': CommentForm()
+        }
+        return render(request, 'blog/post-detail.html', context)
+
+    # # dont need this below anymore since get/post requests above for view include it
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['post_tags'] = self.object.tags.all() # to get access to a single post's fields
+    #     context['comment_form'] = CommentForm() # to create instance of a form based on comment model that you can then access within the template
+    #     return context
+
+# # include the post detail including its content
+# class SinglePostView(DetailView): # this Detail view auto raises error if object not found and takes a slug as a field
+#     template_name = 'blog/post-detail.html'
+#     model = Post # this will be the name but in lowercase that you can access in the template
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['post_tags'] = self.object.tags.all() # to get access to a single post's fields
+#         context['comment_form'] = CommentForm() # to create instance of a form based on comment model that you can then access within the template
+#         return context
 
 # include the post detail including its content
 def post_detail(request, slug):
