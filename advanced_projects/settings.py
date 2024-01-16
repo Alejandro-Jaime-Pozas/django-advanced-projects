@@ -23,9 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-h^xm05c1xv(duh_0o8k5lgs2dyma(k$arznm+t_%x$ub$^zt#4'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False # TURN OFF FOR PRODUCTION
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+
+] # ADD THE HOST DOMAIN WHERE APPLICATION WILL BE HOSTED
 
 
 # Application definition
@@ -118,6 +120,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+STATIC_ROOT = BASE_DIR / 'staticfiles' # MANUALLY ADDED FOR PRODUCTION TO COLLECT ALL STATIC FILES AND SERVE THEM ALL FROM ONE FOLDER; WILL RUN WHEN py manage.py collectstatic
 STATIC_URL = 'static/'
 
 # manually added this to allow other dirs
@@ -130,5 +133,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# DON'T USE THE SAME FOLDER FOR STATIC AND USER UPLOADED MEDIA FILES, THIS IS UNSECURE SINCE COMBINING USER BASED AND SERVER BASED FOLDERS ALLOWS HACKING
 MEDIA_ROOT = BASE_DIR / 'uploads' # root folder that will be used to store image files
 MEDIA_URL = '/files/' # this is how the site url will look like for accessing image uploads
