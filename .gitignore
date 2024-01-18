@@ -6,3 +6,4 @@ advanced_projects/settings.py
 staticfiles
 uploads
 .vscode
+rds*
