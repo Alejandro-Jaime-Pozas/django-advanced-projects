@@ -3,3 +3,6 @@ django_advanced_projects
 *.zip
 .ebextensions
 advanced_projects/settings.py
+staticfiles
+uploads
+.vscode
